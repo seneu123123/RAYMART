@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  /* Oceanic Blue, Cyan & Good Tint Green Theme (Default) */
+  --color-ocean-deep: #030C16;
+  --color-ocean-card: #071726;
+  --color-ocean-surface: #0B2238;
+  --color-ocean-cyan: #06B6D4;
+  --color-ocean-cyan-glow: #22D3EE;
+  --color-ocean-emerald: #10B981;
+  --color-ocean-seafoam: #14B8A6;
+  --color-ocean-blue: #0284C7;
+  --color-ocean-sand: #E2E8F0;
+  --color-ocean-mist: #94A3B8;
+  --color-ocean-highlight: #38BDF8;
+}
+
+@layer base {
+  :root {
+    --bg-base: #030C16;
+    --bg-card: #071726;
+    --bg-surface: #0B2238;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
+    --accent-primary: #06B6D4; /* Cyan */
+    --accent-secondary: #10B981; /* Emerald/Sea green */
+    --accent-tertiary: #0284C7; /* Ocean Blue */
+    --accent-glow: rgba(6, 182, 212, 0.25);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-ocean: rgba(6, 182, 212, 0.25);
+  }
+
+  /* Theme: Deep Sapphire */
+  .theme-deep-sapphire {
+    --bg-base: #020B1A;
+    --bg-card: #051833;
+    --bg-surface: #0A254D;
+    --accent-primary: #38BDF8;
+    --accent-secondary: #06B6D4;
+    --accent-tertiary: #6366F1;
+    --accent-glow: rgba(56, 189, 248, 0.25);
+    --border-ocean: rgba(56, 189, 248, 0.25);
+  }
+
+  /* Theme: Emerald Lagoon */
+  .theme-emerald-lagoon {
+    --bg-base: #021411;
+    --bg-card: #04241F;
+    --bg-surface: #09372F;
+    --accent-primary: #10B981;
+    --accent-secondary: #14B8A6;
+    --accent-tertiary: #06B6D4;
+    --accent-glow: rgba(16, 185, 129, 0.25);
+    --border-ocean: rgba(16, 185, 129, 0.25);
+  }
+
+  /* Theme: Obsidian Luxury */
+  .theme-obsidian-luxury {
+    --bg-base: #070B0E;
+    --bg-card: #0B1014;
+    --bg-surface: #0E151A;
+    --accent-primary: #F26A4F;
+    --accent-secondary: #06B6D4;
+    --accent-tertiary: #D1CCC0;
+    --accent-glow: rgba(242, 106, 79, 0.25);
+    --border-ocean: rgba(242, 106, 79, 0.25);
+  }
+
+  body {
+    background-color: var(--bg-base);
+    color: var(--text-secondary);
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    color: var(--text-primary);
+  }
+}
+
+/* Accessibility: Font Sizing */
+.font-scale-large {
+  font-size: 110% !important;
+}
+
+.font-scale-xlarge {
+  font-size: 122% !important;
+}
+
+/* Accessibility: High Contrast */
+.high-contrast {
+  --bg-base: #000000 !important;
+  --bg-card: #081119 !important;
+  --bg-surface: #0E1E2E !important;
+  --text-primary: #FFFFFF !important;
+  --text-secondary: #F1F5F9 !important;
+  --text-muted: #CBD5E1 !important;
+  --border-subtle: rgba(255, 255, 255, 0.25) !important;
+  --border-ocean: #00FFFF !important;
+  --accent-primary: #00F0FF !important;
+}
+
+/* Accessibility: Reduced Motion */
+.reduced-motion *,
+.reduced-motion *::before,
+.reduced-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Accessibility: Dyslexic Font */
+.font-dyslexic {
+  font-family: system-ui, -apple-system, sans-serif !important;
+  letter-spacing: 0.04em !important;
+  word-spacing: 0.08em !important;
+  line-height: 1.8 !important;
+}
+
+/* Commercial flowy ocean glow and backdrop effects */
+.ocean-glass {
+  background: rgba(7, 23, 38, 0.72);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+}
+
+.ocean-gradient-border {
+  border-image: linear-gradient(135deg, rgba(6, 182, 212, 0.5), rgba(16, 185, 129, 0.3), rgba(2, 132, 199, 0.4)) 1;
+}
+
+.ocean-glow {
+  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.22);
+}
+
+.ocean-glow-emerald {
+  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.22);
+}
+
+/* Custom Flowy Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0D324D;
+  border-radius: 9999px;
+  border: 2px solid var(--bg-base);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #06B6D4;
+}

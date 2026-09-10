@@ -1,0 +1,6 @@
+{
+  "name": "ALYN SHIR",
+  "description": "ALYN SHIR - Premium Philippine Island Expedition & Marine Tour Platform featuring client charters, automated concierge, dynamic PAGASA weather telemetry, customizable oceanic themes, and enterprise operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
