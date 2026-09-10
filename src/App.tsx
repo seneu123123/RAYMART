@@ -20,6 +20,7 @@ import { CookieConsent } from "./components/client/CookieConsent";
 
 // Admin Portal Components
 import { AdminLayout } from "./components/admin/AdminLayout";
+import { AdminOTPModal } from "./components/admin/AdminOTPModal";
 import { DashboardModule } from "./components/admin/modules/DashboardModule";
 import { PackagesModule } from "./components/admin/modules/PackagesModule";
 import { GuidesModule } from "./components/admin/modules/GuidesModule";
@@ -37,6 +38,14 @@ export default function App() {
   // Navigation & Portal State
   const [currentPortal, setCurrentPortal] = useState<"client" | "admin">("client");
   const [adminModule, setAdminModule] = useState<AdminModuleKey>("dashboard");
+  const [adminOtpOpen, setAdminOtpOpen] = useState(false);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem("alynshir_admin_auth") === "true";
+    } catch {
+      return false;
+    }
+  });
 
   // Domain State
   const [packages, setPackages] = useState<TourPackage[]>(StorageService.getPackages());
@@ -52,6 +61,22 @@ export default function App() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [cookiesDrawerOpen, setCookiesDrawerOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+
+  // Easter Egg Keyboard Hotkey: Ctrl+Shift+A or Cmd+Shift+A
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === "a" || e.key === "A")) {
+        e.preventDefault();
+        if (isAdminAuthenticated) {
+          setCurrentPortal("admin");
+        } else {
+          setAdminOtpOpen(true);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAdminAuthenticated]);
 
   // Initialize Theme & Accessibility classes on root
   useEffect(() => {
@@ -95,6 +120,57 @@ export default function App() {
     return () => window.removeEventListener("ht_storage_updated", handleStorageUpdate);
   }, []);
 
+  const handleTriggerAdminEasterEgg = () => {
+    if (isAdminAuthenticated) {
+      setCurrentPortal("admin");
+    } else {
+      setAdminOtpOpen(true);
+    }
+  };
+
+  const handleOtpSuccess = (authStaff: UserAccount) => {
+    try {
+      sessionStorage.setItem("alynshir_admin_auth", "true");
+    } catch {
+      // ignore
+    }
+    setIsAdminAuthenticated(true);
+    setCurrentUser(authStaff);
+    StorageService.setCurrentUser(authStaff.id);
+    setAdminOtpOpen(false);
+    setCurrentPortal("admin");
+  };
+
+  const handleAdminLogout = () => {
+    try {
+      sessionStorage.removeItem("alynshir_admin_auth");
+    } catch {
+      // ignore
+    }
+    setIsAdminAuthenticated(false);
+    setCurrentPortal("client");
+    StorageService.addAuditLog({
+      action: "ADMIN_SESSION_TERMINATED",
+      module: "Security Gateway",
+      details: "Staff safely logged out. Operations Tower locked.",
+      severity: "Info",
+      userName: currentUser.name,
+      role: currentUser.role,
+      userEmail: currentUser.email,
+      ipAddress: "192.168.1.104",
+    });
+  };
+
+  const handlePortalSwitch = (target: "client" | "admin") => {
+    if (target === "admin") {
+      if (!isAdminAuthenticated) {
+        setAdminOtpOpen(true);
+        return;
+      }
+    }
+    setCurrentPortal(target);
+  };
+
   const handleSwitchUser = (userId: string) => {
     StorageService.setCurrentUser(userId);
     setCurrentUser(StorageService.getCurrentUser());
@@ -109,14 +185,15 @@ export default function App() {
     <div className="min-h-screen bg-[#030C16] text-white flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
       {currentPortal === "client" ? (
         <>
-          {/* Client Header */}
+          {/* Client Header with 5-Tap Easter Egg */}
           <Header
             currentPortal={currentPortal}
-            onSwitchPortal={setCurrentPortal}
+            onSwitchPortal={handlePortalSwitch}
             onOpenWeather={() => setWeatherOpen(true)}
             onOpenTracker={() => setTrackerOpen(true)}
             onOpenConcierge={() => setConciergeOpen(true)}
             onOpenTheme={() => setThemeOpen(true)}
+            onTriggerAdminEasterEgg={handleTriggerAdminEasterEgg}
             currentUser={currentUser}
           />
 
@@ -135,12 +212,12 @@ export default function App() {
             />
           </main>
 
-          {/* Client Commercial Oceanic Footer with Comprehensive Compliance */}
+          {/* Client Commercial Oceanic Footer with 5-Tap Easter Egg on Logo */}
           <Footer
             onOpenLegal={() => setLegalOpen(true)}
             onOpenCookies={() => setCookiesDrawerOpen(true)}
             onOpenTheme={() => setThemeOpen(true)}
-            onSwitchPortal={setCurrentPortal}
+            onTriggerAdminEasterEgg={handleTriggerAdminEasterEgg}
           />
         </>
       ) : (
@@ -149,8 +226,9 @@ export default function App() {
           currentUser={currentUser}
           activeModule={adminModule}
           onSelectModule={setAdminModule}
-          onSwitchPortal={setCurrentPortal}
+          onSwitchPortal={handlePortalSwitch}
           onSwitchUser={handleSwitchUser}
+          onLogout={handleAdminLogout}
         >
           {adminModule === "dashboard" && (
             <DashboardModule
@@ -196,6 +274,12 @@ export default function App() {
       )}
 
       {/* Global Modals */}
+      <AdminOTPModal
+        isOpen={adminOtpOpen}
+        onClose={() => setAdminOtpOpen(false)}
+        onSuccess={handleOtpSuccess}
+      />
+
       <BookingModal
         packageItem={bookingModalPkg}
         onClose={() => setBookingModalPkg(null)}

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Compass, CloudSun, Search, Sparkles, Sliders, Menu, X, ArrowRight, Anchor, Shield } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Compass, CloudSun, Search, Sparkles, Sliders, Menu, X, Anchor, Shield, Lock } from "lucide-react";
 import { UserAccount } from "../../types";
 
 interface HeaderProps {
@@ -9,6 +9,7 @@ interface HeaderProps {
   onOpenTracker: () => void;
   onOpenConcierge: () => void;
   onOpenTheme?: () => void;
+  onTriggerAdminEasterEgg?: () => void;
   currentUser: UserAccount;
 }
 
@@ -19,10 +20,13 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTracker,
   onOpenConcierge,
   onOpenTheme,
+  onTriggerAdminEasterEgg,
   currentUser,
 }) => {
   const [currentTime, setCurrentTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const update = () => {
@@ -43,23 +47,61 @@ export const Header: React.FC<HeaderProps> = ({
     return () => clearInterval(interval);
   }, []);
 
+  const handleBrandClick = () => {
+    if (currentPortal === "admin") {
+      onSwitchPortal("client");
+      return;
+    }
+
+    setTapCount((prev) => {
+      const next = prev + 1;
+      if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+
+      if (next >= 5) {
+        if (onTriggerAdminEasterEgg) {
+          onTriggerAdminEasterEgg();
+        }
+        return 0;
+      }
+
+      tapTimerRef.current = setTimeout(() => {
+        setTapCount(0);
+      }, 2500);
+
+      return next;
+    });
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full bg-[#030C16]/90 backdrop-blur-xl border-b border-cyan-500/20 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          {/* Brand Logo */}
+          {/* Brand Logo with 5-Tap Easter Egg */}
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => onSwitchPortal("client")}
-              className="flex items-center space-x-3.5 group text-left cursor-pointer"
+              onClick={handleBrandClick}
+              title={currentPortal === "client" ? "Tap 5x for Operations Gateway (or press Ctrl+Shift+A)" : "Return to traveler view"}
+              className="flex items-center space-x-3.5 group text-left cursor-pointer select-none"
             >
-              <div className="w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-all">
+              <div className="relative w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-all">
                 <Anchor className="w-6 h-6 animate-pulse" />
+                {tapCount >= 2 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-[#030C16] text-[10px] font-mono font-bold flex items-center justify-center animate-ping">
+                    {tapCount}
+                  </span>
+                )}
               </div>
               <div>
-                <span className="block font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors">
-                  ALYN SHIR
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="block font-serif text-2xl sm:text-3xl font-bold tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+                    ALYN SHIR
+                  </span>
+                  {tapCount >= 2 && (
+                    <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-500/40 animate-pulse">
+                      Gate: {tapCount}/5
+                    </span>
+                  )}
+                </div>
                 <span className="block text-[10px] tracking-[0.22em] uppercase text-cyan-400/80 font-semibold">
                   Marine Expeditions &amp; Charters
                 </span>
@@ -116,9 +158,9 @@ export const Header: React.FC<HeaderProps> = ({
             )}
           </nav>
 
-          {/* Right Controls: Date & Portal Switch */}
+          {/* Right Controls: Date & Status (No visible admin button) */}
           <div className="flex items-center space-x-3">
-            <div className="hidden xl:block text-right text-xs">
+            <div className="hidden sm:block text-right text-xs">
               <span className="text-slate-400 block font-mono text-[11px]">{currentTime}</span>
               <span className="text-emerald-400 text-[10px] font-semibold flex items-center justify-end gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
@@ -126,17 +168,8 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </div>
 
-            {/* Portal Switcher Button */}
-            {currentPortal === "client" ? (
-              <button
-                onClick={() => onSwitchPortal("admin")}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#071726] hover:bg-[#0B2238] border border-cyan-500/30 text-xs font-semibold text-white hover:border-cyan-400 transition-all shadow-sm cursor-pointer"
-              >
-                <Compass className="w-4 h-4 text-cyan-400" />
-                <span className="hidden sm:inline">Operations Tower</span>
-                <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-              </button>
-            ) : (
+            {/* If currently in admin portal, provide traveler exit */}
+            {currentPortal === "admin" && (
               <button
                 onClick={() => onSwitchPortal("client")}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#030C16] text-xs font-bold transition-all shadow-md shadow-cyan-500/20 cursor-pointer"

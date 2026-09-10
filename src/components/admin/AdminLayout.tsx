@@ -28,6 +28,7 @@ interface AdminLayoutProps {
   onSelectModule: (module: AdminModuleKey) => void;
   onSwitchPortal: (portal: "client" | "admin") => void;
   onSwitchUser: (userId: string) => void;
+  onLogout?: () => void;
   children: React.ReactNode;
 }
 
@@ -37,6 +38,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   onSelectModule,
   onSwitchPortal,
   onSwitchUser,
+  onLogout,
   children,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -158,14 +160,14 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             })}
           </nav>
 
-          {/* Bottom Return to Traveler Portal */}
+          {/* Bottom Return to Traveler Portal & Lock */}
           <div className="p-4 border-t border-cyan-500/15 space-y-2">
             <button
-              onClick={() => onSwitchPortal("client")}
-              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[#030C16] hover:bg-cyan-950/40 text-xs font-semibold text-cyan-300 transition-colors cursor-pointer border border-cyan-500/20"
+              onClick={onLogout || (() => onSwitchPortal("client"))}
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[#030C16] hover:bg-rose-950/30 text-xs font-semibold text-rose-300 hover:text-rose-200 transition-colors cursor-pointer border border-rose-500/20"
             >
-              <LogOut className="w-4 h-4 text-cyan-400" />
-              <span>Return to Client Portal</span>
+              <LogOut className="w-4 h-4 text-rose-400" />
+              <span>Lock Tower &amp; Log Out</span>
             </button>
             <p className="text-[10px] text-center text-slate-400">
               DOT License: DOT-ACCR-RO7-2026-8819
@@ -187,6 +189,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           </div>
 
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs text-cyan-400 font-mono">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span>OTP Authenticated</span>
+            </div>
+
             <div className="flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span>PCG Ports Cleared</span>
@@ -199,6 +206,15 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                 <span className="text-slate-400 ml-1">({currentUser.role})</span>
               </div>
             </div>
+
+            <button
+              onClick={onLogout || (() => onSwitchPortal("client"))}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-500/30 text-slate-300 hover:text-rose-200 text-xs font-medium transition-colors cursor-pointer"
+              title="Lock operations tower session"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Lock Tower</span>
+            </button>
           </div>
         </header>
 

@@ -210,7 +210,8 @@ export interface AuditLogEntry {
   action: string;
   module: string;
   details: string;
-  severity: "Info" | "Warning" | "Security Alert" | "High";
+  severity: "Info" | "Warning" | "Security Alert" | "High" | "Critical";
+  ipAddress?: string;
 }
 
 export interface DestinationWeather {

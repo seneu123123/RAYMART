@@ -337,7 +337,16 @@ export const StorageService = {
   getAuditLogs(): AuditLogEntry[] {
     return getItem(STORAGE_KEYS.AUDIT_LOGS, INITIAL_AUDIT_LOGS);
   },
-  addAuditLog(entry: Omit<AuditLogEntry, "id" | "timestamp" | "userEmail" | "userName" | "role">): void {
+  addAuditLog(entry: {
+    action: string;
+    module?: string;
+    details: string;
+    severity: "Info" | "Warning" | "Security Alert" | "High" | "Critical";
+    userEmail?: string;
+    userName?: string;
+    role?: string;
+    ipAddress?: string;
+  }): void {
     const currentUser = this.getCurrentUser();
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, "0");
@@ -346,10 +355,14 @@ export const StorageService = {
     const newLog: AuditLogEntry = {
       id: `aud-${Date.now().toString(36)}`,
       timestamp,
-      userEmail: currentUser.email,
-      userName: currentUser.name,
-      role: currentUser.role,
-      ...entry,
+      userEmail: entry.userEmail || currentUser.email,
+      userName: entry.userName || currentUser.name,
+      role: entry.role || currentUser.role,
+      action: entry.action,
+      module: entry.module || "Security",
+      details: entry.details,
+      severity: entry.severity,
+      ipAddress: entry.ipAddress || "192.168.1.104",
     };
 
     const currentLogs = this.getAuditLogs();

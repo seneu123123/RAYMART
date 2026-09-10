@@ -23,7 +23,7 @@ function getGenAI(): GoogleGenAI | null {
       apiKey: process.env.GEMINI_API_KEY,
       httpOptions: {
         headers: {
-          "User-Agent": "aistudio-build",
+          "User-Agent": "alynshir-platform",
         },
       },
     });
@@ -37,7 +37,7 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (_req, res) => {
-    res.json({ status: "ok", service: "Holiday Travelers TOCBS API" });
+    res.json({ status: "ok", service: "ALYN SHIR Marine Expeditions API" });
   });
 
   // AI Concierge Endpoint
@@ -67,14 +67,14 @@ async function startServer() {
         } else if (lower.includes("pack") || lower.includes("wear") || lower.includes("bring")) {
           fallbackResponse = "Essential Philippine Expedition Packing Checklist:\n1. 20L-30L Waterproof Dry Bag\n2. Mineral, reef-safe sunscreen (SPF 50+)\n3. Breathable UV rashguards & aqua shoes\n4. Waterproof phone pouch & powerbank\n5. Valid government ID for Philippine Coast Guard manifest verification.";
         } else {
-          fallbackResponse = `Mabuhay! Welcome to Holiday Travelers & Tours Island Concierge. I am your expert Philippine expedition planner (DOT-ACCR-RO7-2026-8819). Whether you are dreaming of Coron's underwater shipwrecks, El Nido's limestone lagoons, Siargao's azure breaks, or Bohol's heritage hills, I can tailor the perfect itinerary and check sea weather conditions for you. Where would you like to explore?`;
+          fallbackResponse = `Mabuhay! Welcome to ALYN SHIR Island Concierge. I am your expert Philippine expedition planner (DOT-ACCR-RO7-2026-8819). Whether you are dreaming of Coron's underwater shipwrecks, El Nido's limestone lagoons, Siargao's azure breaks, or Bohol's heritage hills, I can tailor the perfect itinerary and check sea weather conditions for you. Where would you like to explore?`;
         }
 
         return res.json({ reply: fallbackResponse });
       }
 
       // Format conversation contents for Gemini
-      const systemInstruction = `You are the Lead Island Concierge for 'Holiday Travelers Travel and Tours Inc' (DOT Accreditation No. DOT-ACCR-RO7-2026-8819), an ultra-luxury and adventure expedition operator across the Philippine Archipelago (Palawan, El Nido, Coron, Cebu, Bohol, Siargao, Batanes, Boracay). 
+      const systemInstruction = `You are the Lead Island Concierge for 'ALYN SHIR Marine Expeditions & Luxury Charters Inc' (DOT Accreditation No. DOT-ACCR-RO7-2026-8819), an ultra-luxury and adventure expedition operator across the Philippine Archipelago (Palawan, El Nido, Coron, Cebu, Bohol, Siargao, Batanes, Boracay). 
 Provide warm, editorial, concise, and deeply knowledgeable recommendations. Emphasize maritime safety, Philippine Coast Guard (PCG) compliance, seasonal weather, optimal tide windows, local cultural etiquette, and packing necessities. Keep responses engaging and structured with bullet points where appropriate.`;
 
       // Build contents array
@@ -98,13 +98,13 @@ Provide warm, editorial, concise, and deeply knowledgeable recommendations. Emph
         },
       });
 
-      const reply = response.text || "Thank you for inquiring with Holiday Travelers. Our team is ready to curate your Philippine journey.";
+      const reply = response.text || "Thank you for inquiring with ALYN SHIR. Our team is ready to curate your Philippine journey.";
       return res.json({ reply });
     } catch (err: any) {
-      console.error("Gemini Concierge API error:", err);
+      console.error("Concierge API error:", err);
       return res.status(500).json({
-        error: "Failed to generate AI advice",
-        fallback: "Mabuhay! Our AI Concierge is currently busy checking tidal charts. You can browse our curated packages below or contact our operations tower.",
+        error: "Failed to generate expedition advice",
+        fallback: "Mabuhay! Our Expeditions Concierge is currently checking tidal charts. You can browse our curated packages below or contact our operations tower.",
       });
     }
   });

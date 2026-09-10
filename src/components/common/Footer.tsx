@@ -1,31 +1,48 @@
-import React from "react";
+import React, { useState, useRef } from "react";
 import {
   ShieldCheck,
   Phone,
   Mail,
   MapPin,
   Anchor,
-  ExternalLink,
   LifeBuoy,
   AlertCircle,
   Sliders,
   Cookie,
   FileText,
+  Lock,
 } from "lucide-react";
 
 interface FooterProps {
   onOpenLegal: () => void;
   onOpenCookies: () => void;
   onOpenTheme?: () => void;
-  onSwitchPortal: (portal: "client" | "admin") => void;
+  onTriggerAdminEasterEgg?: () => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenLegal,
   onOpenCookies,
   onOpenTheme,
-  onSwitchPortal,
+  onTriggerAdminEasterEgg,
 }) => {
+  const [footerTapCount, setFooterTapCount] = useState(0);
+  const footerTapTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handleFooterBrandTap = () => {
+    setFooterTapCount((prev) => {
+      const next = prev + 1;
+      if (footerTapTimer.current) clearTimeout(footerTapTimer.current);
+      if (next >= 5) {
+        if (onTriggerAdminEasterEgg) onTriggerAdminEasterEgg();
+        return 0;
+      }
+      footerTapTimer.current = setTimeout(() => {
+        setFooterTapCount(0);
+      }, 2500);
+      return next;
+    });
+  };
   return (
     <footer className="bg-[#030C16] border-t border-cyan-500/20 text-slate-300 pt-16 pb-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -98,14 +115,25 @@ export const Footer: React.FC<FooterProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-6">
           {/* Col 1 & 2: Brand & License */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center space-x-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20">
+            <div
+              onClick={handleFooterBrandTap}
+              className="flex items-center space-x-3.5 cursor-pointer select-none group"
+              title="ALYN SHIR Marine Expeditions"
+            >
+              <div className="w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20 group-hover:border-cyan-400 transition-colors">
                 <Anchor className="w-6 h-6" />
               </div>
               <div>
-                <span className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  ALYN SHIR
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-tight group-hover:text-cyan-300 transition-colors">
+                    ALYN SHIR
+                  </span>
+                  {footerTapCount >= 2 && (
+                    <span className="text-[10px] font-mono text-cyan-400 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-500/40 animate-pulse">
+                      Gate: {footerTapCount}/5
+                    </span>
+                  )}
+                </div>
                 <span className="block text-[11px] uppercase tracking-widest text-cyan-400 font-semibold">
                   Marine Expeditions &amp; Luxury Charters
                 </span>
@@ -151,20 +179,18 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* Col 4: Operations & Portals */}
+          {/* Col 4: Operations Control (No visible admin button) */}
           <div className="space-y-3">
             <h4 className="font-serif text-base font-bold text-white tracking-wide">
               Operations Control
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
-              <li>
-                <button
-                  onClick={() => onSwitchPortal("admin")}
-                  className="hover:text-cyan-300 transition-colors text-left flex items-center gap-1.5 font-medium text-cyan-400/90"
-                >
-                  <span>Operations Tower Portal</span>
-                  <ExternalLink className="w-3 h-3" />
-                </button>
+              <li className="flex items-center gap-1.5 text-slate-400 font-medium">
+                <Lock className="w-3 h-3 text-cyan-500/70" />
+                <span>Maritime Dispatch Relay</span>
+                <span className="text-[9px] text-cyan-400 bg-cyan-950/80 px-1.5 py-0.5 rounded border border-cyan-500/30">
+                  Restricted
+                </span>
               </li>
               <li>Passenger Manifest &amp; E-Tickets</li>
               <li>Fleet Readiness &amp; Seaworthiness</li>
