@@ -13,6 +13,7 @@ import {
   AccessibilitySettings,
   CookieSettings,
   ConciergeAutoReply,
+  ClientNotification,
 } from "../types";
 
 import {
@@ -26,6 +27,7 @@ import {
   INITIAL_AUDIT_LOGS,
   INITIAL_WEATHER,
   INITIAL_SYSTEM_SETTINGS,
+  INITIAL_CLIENT_NOTIFICATIONS,
 } from "../data/seedData";
 
 const STORAGE_KEYS = {
@@ -43,6 +45,7 @@ const STORAGE_KEYS = {
   THEME: "alynshir_theme_settings",
   ACCESSIBILITY: "alynshir_accessibility_settings",
   COOKIES: "alynshir_cookie_settings",
+  NOTIFICATIONS: "alynshir_client_notifications",
 };
 
 export const DEFAULT_THEME_SETTINGS: ThemeSettings = {
@@ -213,7 +216,24 @@ function setItem<T>(key: string, value: T): void {
 export const StorageService = {
   // Staff Accounts
   getStaffAccounts(): UserAccount[] {
-    return getItem(STORAGE_KEYS.STAFF, INITIAL_STAFF_ACCOUNTS);
+    const list = getItem(STORAGE_KEYS.STAFF, INITIAL_STAFF_ACCOUNTS);
+    let modified = false;
+    const sanitized = list.map((s) => {
+      const updated = { ...s };
+      if (updated.email && updated.email.endsWith("@mail.com")) {
+        updated.email = updated.email.replace("@mail.com", "@gmail.com");
+        modified = true;
+      }
+      if (!updated.totpEnabled) {
+        updated.totpEnabled = true;
+        modified = true;
+      }
+      return updated;
+    });
+    if (modified && typeof window !== "undefined") {
+      setItem(STORAGE_KEYS.STAFF, sanitized);
+    }
+    return sanitized;
   },
   saveStaffAccounts(accounts: UserAccount[]): void {
     setItem(STORAGE_KEYS.STAFF, accounts);
@@ -284,6 +304,86 @@ export const StorageService = {
       this.saveBookings(list);
     }
   },
+  resetBookingManifest(bookingId: string): Booking | null {
+    const list = this.getBookings();
+    const idx = list.findIndex((b) => b.id.toUpperCase() === bookingId.trim().toUpperCase());
+    if (idx !== -1) {
+      const b = list[idx];
+      const resetPassengers = b.passengers.map((p) => ({
+        ...p,
+        checkedIn: false,
+        checkedOut: false,
+        checkInTimestamp: undefined,
+        checkOutTimestamp: undefined,
+        idVerified: false,
+      }));
+      const updated: Booking = {
+        ...b,
+        passengers: resetPassengers,
+        embarkationStatus: "Awaiting Clearance",
+        manifestAuditStatus: "Pending Manifest Review",
+        manifestNotes: undefined,
+      };
+      list[idx] = updated;
+      this.saveBookings(list);
+      return updated;
+    }
+    return null;
+  },
+  checkOutPassenger(bookingId: string, passengerId: string): Booking | null {
+    const list = this.getBookings();
+    const idx = list.findIndex((b) => b.id.toUpperCase() === bookingId.trim().toUpperCase());
+    if (idx !== -1) {
+      const b = list[idx];
+      const nowTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const updatedPax = b.passengers.map((p) =>
+        p.id === passengerId
+          ? {
+              ...p,
+              checkedIn: false,
+              checkedOut: true,
+              checkOutTimestamp: nowTime,
+            }
+          : p
+      );
+
+      const allCheckedOut = updatedPax.every((p) => p.checkedOut);
+      const updated: Booking = {
+        ...b,
+        passengers: updatedPax,
+        embarkationStatus: allCheckedOut ? "Checked-Out & Completed" : b.embarkationStatus,
+        status: allCheckedOut ? "Completed" : b.status,
+      };
+      list[idx] = updated;
+      this.saveBookings(list);
+      return updated;
+    }
+    return null;
+  },
+  checkOutAllPassengersAndResetManifest(bookingId: string): Booking | null {
+    const list = this.getBookings();
+    const idx = list.findIndex((b) => b.id.toUpperCase() === bookingId.trim().toUpperCase());
+    if (idx !== -1) {
+      const b = list[idx];
+      const nowTime = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      const checkedOutPax = b.passengers.map((p) => ({
+        ...p,
+        checkedIn: false,
+        checkedOut: true,
+        checkOutTimestamp: nowTime,
+      }));
+      const updated: Booking = {
+        ...b,
+        passengers: checkedOutPax,
+        embarkationStatus: "Checked-Out & Completed",
+        status: "Completed",
+      };
+      list[idx] = updated;
+      this.saveBookings(list);
+      return updated;
+    }
+    return null;
+  },
 
   // Fleet
   getFleet(): FleetAsset[] {
@@ -319,6 +419,14 @@ export const StorageService = {
   addPayment(payment: PaymentTransaction): void {
     const list = this.getPayments();
     this.savePayments([payment, ...list]);
+  },
+  updatePayment(payment: PaymentTransaction): void {
+    const list = this.getPayments();
+    const idx = list.findIndex((p) => p.id === payment.id);
+    if (idx !== -1) {
+      list[idx] = payment;
+      this.savePayments(list);
+    }
   },
 
   // Reviews
@@ -485,6 +593,50 @@ export const StorageService = {
     return match;
   },
 
+  // Client Notifications
+  getClientNotifications(): ClientNotification[] {
+    return getItem(STORAGE_KEYS.NOTIFICATIONS, INITIAL_CLIENT_NOTIFICATIONS);
+  },
+  saveClientNotifications(notifications: ClientNotification[]): void {
+    setItem(STORAGE_KEYS.NOTIFICATIONS, notifications);
+  },
+  addClientNotification(
+    notif: Omit<ClientNotification, "id" | "timestamp" | "read">
+  ): ClientNotification {
+    const list = this.getClientNotifications();
+    const newNotif: ClientNotification = {
+      ...notif,
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      timestamp: "Just now",
+      read: false,
+    };
+    const updated = [newNotif, ...list];
+    this.saveClientNotifications(updated);
+    return newNotif;
+  },
+  markNotificationAsRead(id: string): void {
+    const list = this.getClientNotifications();
+    const updated = list.map((n) => (n.id === id ? { ...n, read: true } : n));
+    this.saveClientNotifications(updated);
+  },
+  markAllNotificationsAsRead(): void {
+    const list = this.getClientNotifications();
+    const updated = list.map((n) => ({ ...n, read: true }));
+    this.saveClientNotifications(updated);
+  },
+  getUnreadNotificationCount(): number {
+    return this.getClientNotifications().filter((n) => !n.read).length;
+  },
+
+  // Cross-component subscription listener
+  subscribe(callback: () => void): () => void {
+    if (typeof window !== "undefined") {
+      window.addEventListener("ht_storage_updated", callback);
+      return () => window.removeEventListener("ht_storage_updated", callback);
+    }
+    return () => {};
+  },
+
   // Reset to Seed
   resetToSeedData(): void {
     localStorage.removeItem(STORAGE_KEYS.STAFF);
@@ -501,6 +653,7 @@ export const StorageService = {
     localStorage.removeItem(STORAGE_KEYS.THEME);
     localStorage.removeItem(STORAGE_KEYS.ACCESSIBILITY);
     localStorage.removeItem(STORAGE_KEYS.COOKIES);
+    localStorage.removeItem(STORAGE_KEYS.NOTIFICATIONS);
     emitChange();
   },
 };

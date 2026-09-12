@@ -11,6 +11,7 @@ import {
   Eye,
   Sliders,
   Sparkles,
+  Mail,
 } from "lucide-react";
 import {
   SystemSettings,
@@ -23,6 +24,8 @@ import {
   DEFAULT_THEME_SETTINGS,
   DEFAULT_ACCESSIBILITY_SETTINGS,
 } from "../../../services/storage";
+import { EmailService } from "../../../services/emailService";
+import { EmailJSConfigModal } from "../EmailJSConfigModal";
 
 interface SettingsModuleProps {
   onDataReset: () => void;
@@ -35,6 +38,8 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onDataReset }) =
     StorageService.getAccessibilitySettings()
   );
   const [savedAlert, setSavedAlert] = useState(false);
+  const [showEmailJsModal, setShowEmailJsModal] = useState(false);
+  const [emailJsConfigured, setEmailJsConfigured] = useState(() => EmailService.isConfigured());
 
   const applyDOMSettings = (th: ThemeSettings, ac: AccessibilitySettings) => {
     const root = document.documentElement;
@@ -506,6 +511,55 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onDataReset }) =
         </div>
       </form>
 
+      {/* EmailJS & Communications Gateway */}
+      <div className="bg-[#071726] border border-cyan-500/20 rounded-3xl p-6 space-y-4 shadow-lg">
+        <div className="flex items-center justify-between border-b border-white/5 pb-3">
+          <div className="flex items-center gap-2.5">
+            <Mail className="w-5 h-5 text-cyan-400" />
+            <div>
+              <h3 className="font-serif text-lg text-white font-bold">
+                EmailJS OTP &amp; Notification Gateway
+              </h3>
+              <p className="text-xs text-slate-400">
+                Deliver two-factor OTP verification codes and client booking confirmations straight to real Gmail or Outlook inboxes.
+              </p>
+            </div>
+          </div>
+          <span
+            className={`text-xs px-3 py-1 rounded-full font-semibold border ${
+              emailJsConfigured
+                ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+            }`}
+          >
+            {emailJsConfigured ? "Live EmailJS Connected" : "Local Simulation Mode"}
+          </span>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-[#030C16] border border-cyan-500/20">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-white">
+              {emailJsConfigured
+                ? "EmailJS is configured and dispatching real emails."
+                : "EmailJS credentials not yet configured."}
+            </p>
+            <p className="text-[11px] text-slate-400">
+              {emailJsConfigured
+                ? "All officer OTP codes and communications are sent through your EmailJS Service & Template."
+                : "Connect your free EmailJS account with our built-in 3-minute tutorial to send live emails to any inbox."}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowEmailJsModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#030C16] text-xs font-bold transition-all shadow-md shadow-cyan-500/20 cursor-pointer shrink-0"
+          >
+            <Mail className="w-3.5 h-3.5" />
+            <span>{emailJsConfigured ? "Manage EmailJS Keys" : "Configure EmailJS (Teach Me How)"}</span>
+          </button>
+        </div>
+      </div>
+
       {/* Danger Zone: Factory Seed Reset */}
       <div className="bg-rose-950/20 border border-rose-500/25 rounded-3xl p-6 space-y-3">
         <div className="flex items-center gap-2 text-rose-400">
@@ -523,6 +577,18 @@ export const SettingsModule: React.FC<SettingsModuleProps> = ({ onDataReset }) =
           <span>Reset to ALYN SHIR Factory Seed Data</span>
         </button>
       </div>
+
+      {/* EmailJS Setup Modal */}
+      <EmailJSConfigModal
+        isOpen={showEmailJsModal}
+        onClose={() => {
+          setShowEmailJsModal(false);
+          setEmailJsConfigured(EmailService.isConfigured());
+        }}
+        onConfigSaved={() => {
+          setEmailJsConfigured(EmailService.isConfigured());
+        }}
+      />
     </div>
   );
 };

@@ -4,14 +4,16 @@ import {
   Phone,
   Mail,
   MapPin,
-  Anchor,
   LifeBuoy,
   AlertCircle,
   Sliders,
   Cookie,
   FileText,
   Lock,
+  QrCode,
+  Sparkles,
 } from "lucide-react";
+import { AshLogo } from "./AshLogo";
 
 interface FooterProps {
   onOpenLegal: () => void;
@@ -30,18 +32,22 @@ export const Footer: React.FC<FooterProps> = ({
   const footerTapTimer = useRef<NodeJS.Timeout | null>(null);
 
   const handleFooterBrandTap = () => {
-    setFooterTapCount((prev) => {
-      const next = prev + 1;
-      if (footerTapTimer.current) clearTimeout(footerTapTimer.current);
-      if (next >= 5) {
-        if (onTriggerAdminEasterEgg) onTriggerAdminEasterEgg();
-        return 0;
+    if (footerTapTimer.current) {
+      clearTimeout(footerTapTimer.current);
+    }
+
+    const next = footerTapCount + 1;
+    if (next >= 5) {
+      setFooterTapCount(0);
+      if (onTriggerAdminEasterEgg) {
+        onTriggerAdminEasterEgg();
       }
+    } else {
+      setFooterTapCount(next);
       footerTapTimer.current = setTimeout(() => {
         setFooterTapCount(0);
       }, 2500);
-      return next;
-    });
+    }
   };
   return (
     <footer className="bg-[#030C16] border-t border-cyan-500/20 text-slate-300 pt-16 pb-12 transition-colors">
@@ -69,8 +75,8 @@ export const Footer: React.FC<FooterProps> = ({
                 DOT-ACCR-RO7-2026-8819
               </span>
               <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-xs font-mono text-cyan-300 font-semibold">
-                <Anchor className="w-3.5 h-3.5" />
-                PCG Seaworthiness Inspected
+                <QrCode className="w-3.5 h-3.5" />
+                Digital Embarkation Passes
               </span>
             </div>
           </div>
@@ -80,28 +86,28 @@ export const Footer: React.FC<FooterProps> = ({
             <div className="space-y-2 bg-[#030C16] p-4 rounded-2xl border border-white/5">
               <div className="flex items-center gap-2 font-semibold text-cyan-400 text-sm">
                 <LifeBuoy className="w-4 h-4" />
-                <h4>PCG MC 03-14 Vessel Clearance</h4>
+                <h4>Safe Sea Voyage Scheduling</h4>
               </div>
               <p className="text-slate-400 leading-relaxed">
-                Vessels do not embark during active PAGASA Public Storm Signals or wave crests exceeding 2.0 meters. SOLAS-approved life vests are mandatory before disembarkation from port docks.
+                Expeditions are scheduled strictly during optimal sea states. High-grade personal flotation gear and certified marine master guides accompany all private charters.
               </p>
             </div>
 
             {/* Safety Rule 2 */}
             <div className="space-y-2 bg-[#030C16] p-4 rounded-2xl border border-white/5">
               <div className="flex items-center gap-2 font-semibold text-emerald-400 text-sm">
-                <AlertCircle className="w-4 h-4" />
-                <h4>Passenger Manifest &amp; QR Pass</h4>
+                <QrCode className="w-4 h-4" />
+                <h4>Passenger Onboarding &amp; QR Pass</h4>
               </div>
               <p className="text-slate-400 leading-relaxed">
-                100% of guest manifests are transmitted directly to the Philippine Coast Guard station commander prior to anchor lifting. Each passenger is issued a verified biometric QR pass.
+                Guest manifests are verified by our operations desk prior to departure. Passengers receive mobile boarding passes with offline capabilities for frictionless dockside check-in.
               </p>
             </div>
 
             {/* Safety Rule 3 */}
             <div className="space-y-2 bg-[#030C16] p-4 rounded-2xl border border-white/5">
               <div className="flex items-center gap-2 font-semibold text-cyan-300 text-sm">
-                <Anchor className="w-4 h-4" />
+                <Sparkles className="w-4 h-4" />
                 <h4>Conservation &amp; Ancestral Domain</h4>
               </div>
               <p className="text-slate-400 leading-relaxed">
@@ -121,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({
               title="ALYN SHIR Marine Expeditions"
             >
               <div className="w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20 group-hover:border-cyan-400 transition-colors">
-                <Anchor className="w-6 h-6" />
+                <AshLogo className="w-7 h-7" showGlow />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -134,8 +140,8 @@ export const Footer: React.FC<FooterProps> = ({
                     </span>
                   )}
                 </div>
-                <span className="block text-[11px] uppercase tracking-widest text-cyan-400 font-semibold">
-                  Marine Expeditions &amp; Luxury Charters
+                <span className="block text-[10px] uppercase tracking-widest text-cyan-400 font-semibold">
+                  Always Leading Your Next Seamless Horizon, Inspiring Roads
                 </span>
               </div>
             </div>

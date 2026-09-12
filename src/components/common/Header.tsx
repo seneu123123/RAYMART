@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Compass, CloudSun, Search, Sparkles, Sliders, Menu, X, Anchor, Shield, Lock } from "lucide-react";
+import { motion } from "motion/react";
+import { Compass, CloudSun, Search, Sparkles, Sliders, Menu, X, Bell, Shield, Lock } from "lucide-react";
 import { UserAccount } from "../../types";
+import { AshLogo } from "./AshLogo";
+import { StorageService } from "../../services/storage";
 
 interface HeaderProps {
   currentPortal: "client" | "admin";
@@ -9,6 +12,7 @@ interface HeaderProps {
   onOpenTracker: () => void;
   onOpenConcierge: () => void;
   onOpenTheme?: () => void;
+  onOpenNotifications?: () => void;
   onTriggerAdminEasterEgg?: () => void;
   currentUser: UserAccount;
 }
@@ -20,13 +24,26 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenTracker,
   onOpenConcierge,
   onOpenTheme,
+  onOpenNotifications,
   onTriggerAdminEasterEgg,
   currentUser,
 }) => {
   const [currentTime, setCurrentTime] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [tapCount, setTapCount] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
   const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const updateNotifications = () => {
+    setUnreadCount(StorageService.getUnreadNotificationCount());
+  };
+
+  useEffect(() => {
+    updateNotifications();
+    return StorageService.subscribe(() => {
+      updateNotifications();
+    });
+  }, []);
 
   useEffect(() => {
     const update = () => {
@@ -53,23 +70,22 @@ export const Header: React.FC<HeaderProps> = ({
       return;
     }
 
-    setTapCount((prev) => {
-      const next = prev + 1;
-      if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapTimerRef.current) {
+      clearTimeout(tapTimerRef.current);
+    }
 
-      if (next >= 5) {
-        if (onTriggerAdminEasterEgg) {
-          onTriggerAdminEasterEgg();
-        }
-        return 0;
+    const next = tapCount + 1;
+    if (next >= 5) {
+      setTapCount(0);
+      if (onTriggerAdminEasterEgg) {
+        onTriggerAdminEasterEgg();
       }
-
+    } else {
+      setTapCount(next);
       tapTimerRef.current = setTimeout(() => {
         setTapCount(0);
       }, 2500);
-
-      return next;
-    });
+    }
   };
 
   return (
@@ -84,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
               className="flex items-center space-x-3.5 group text-left cursor-pointer select-none"
             >
               <div className="relative w-11 h-11 rounded-2xl bg-[#071726] border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:border-cyan-400 group-hover:shadow-lg group-hover:shadow-cyan-500/25 transition-all">
-                <Anchor className="w-6 h-6 animate-pulse" />
+                <AshLogo className="w-7 h-7" showGlow />
                 {tapCount >= 2 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-cyan-500 text-[#030C16] text-[10px] font-mono font-bold flex items-center justify-center animate-ping">
                     {tapCount}
@@ -102,16 +118,18 @@ export const Header: React.FC<HeaderProps> = ({
                     </span>
                   )}
                 </div>
-                <span className="block text-[10px] tracking-[0.22em] uppercase text-cyan-400/80 font-semibold">
-                  Marine Expeditions &amp; Charters
+                <span className="block text-[10px] tracking-[0.16em] uppercase text-cyan-400/80 font-semibold truncate max-w-[240px] sm:max-w-none">
+                  Always Leading Your Next Seamless Horizon
                 </span>
               </div>
             </button>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-5 text-xs font-semibold">
-            <button
+          <nav className="hidden md:flex items-center space-x-4 text-xs font-semibold">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => {
                 if (currentPortal !== "client") onSwitchPortal("client");
                 const el = document.getElementById("expeditions-catalog");
@@ -120,63 +138,107 @@ export const Header: React.FC<HeaderProps> = ({
               className="text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer py-1.5 px-2.5 rounded-lg hover:bg-cyan-950/30"
             >
               Curated Charters
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onOpenWeather}
               className="flex items-center gap-1.5 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer py-1.5 px-2.5 rounded-lg hover:bg-cyan-950/30"
             >
               <CloudSun className="w-4 h-4 text-cyan-400" />
-              <span>Marine Weather Radar</span>
-            </button>
+              <span>Marine Weather</span>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onOpenTracker}
               className="flex items-center gap-1.5 text-slate-300 hover:text-emerald-300 transition-colors cursor-pointer py-1.5 px-2.5 rounded-lg hover:bg-emerald-950/30"
             >
               <Search className="w-4 h-4 text-emerald-400" />
-              <span>Track Charter QR</span>
-            </button>
+              <span>Track Charter</span>
+            </motion.button>
 
-            <button
+            {/* Live Alerts / Notifications Button */}
+            {onOpenNotifications && (
+              <motion.button
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                onClick={onOpenNotifications}
+                title="Booking Status & Notifications"
+                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-900/50 transition-all cursor-pointer shadow-sm shadow-cyan-500/15"
+              >
+                <Bell className="w-4 h-4 text-cyan-400" />
+                <span>Alerts</span>
+                {unreadCount > 0 && (
+                  <span className="w-4 h-4 rounded-full bg-cyan-400 text-[#030C16] text-[10px] font-bold flex items-center justify-center animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </motion.button>
+            )}
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onOpenConcierge}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-all cursor-pointer shadow-sm shadow-cyan-500/15"
             >
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Auto Concierge</span>
-            </button>
+              <span>Concierge</span>
+            </motion.button>
 
             {onOpenTheme && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onOpenTheme}
                 title="Theme & Accessibility Settings"
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
               >
                 <Sliders className="w-3.5 h-3.5 text-cyan-400" />
                 <span className="hidden lg:inline">Theme</span>
-              </button>
+              </motion.button>
             )}
           </nav>
 
-          {/* Right Controls: Date & Status (No visible admin button) */}
+          {/* Right Controls: Date & Status */}
           <div className="flex items-center space-x-3">
             <div className="hidden sm:block text-right text-xs">
               <span className="text-slate-400 block font-mono text-[11px]">{currentTime}</span>
               <span className="text-emerald-400 text-[10px] font-semibold flex items-center justify-end gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
-                PCG Voyage Clearances Active
+                Digital Expeditions Live
               </span>
             </div>
 
+            {/* Mobile notification bell */}
+            {onOpenNotifications && (
+              <button
+                onClick={onOpenNotifications}
+                className="md:hidden relative p-2 rounded-xl text-slate-300 hover:text-cyan-300 hover:bg-cyan-950/40"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-cyan-400 text-[#030C16] text-[9px] font-bold flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            )}
+
             {/* If currently in admin portal, provide traveler exit */}
             {currentPortal === "admin" && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onSwitchPortal("client")}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-[#030C16] text-xs font-bold transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
               >
                 <Compass className="w-4 h-4" />
                 <span>Traveler Portal</span>
-              </button>
+              </motion.button>
             )}
 
             {/* Mobile Hamburger */}
@@ -194,7 +256,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="md:hidden py-4 border-t border-cyan-500/15 space-y-3 bg-[#071726]/95 px-2 rounded-b-2xl">
             <div className="flex items-center justify-between text-xs px-3 py-1.5 bg-black/40 rounded-xl font-mono text-slate-400">
               <span>{currentTime}</span>
-              <span className="text-emerald-400 font-semibold">PCG Cleared</span>
+              <span className="text-emerald-400 font-semibold">Voyage Clearances Active</span>
             </div>
 
             <div className="flex flex-col space-y-1 text-xs">
@@ -218,7 +280,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-200 hover:bg-cyan-950/40"
               >
                 <CloudSun className="w-4 h-4 text-cyan-400" />
-                <span>Marine Weather Radar</span>
+                <span>Marine Weather</span>
               </button>
 
               <button
@@ -229,8 +291,28 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-200 hover:bg-cyan-950/40"
               >
                 <Search className="w-4 h-4 text-emerald-400" />
-                <span>Track Charter QR</span>
+                <span>Track Charter</span>
               </button>
+
+              {onOpenNotifications && (
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenNotifications();
+                  }}
+                  className="flex items-center justify-between px-3 py-2 rounded-xl text-cyan-300 bg-cyan-950/30 hover:bg-cyan-950/50"
+                >
+                  <div className="flex items-center gap-2">
+                    <Bell className="w-4 h-4 text-cyan-400" />
+                    <span>Booking Alerts &amp; Passes</span>
+                  </div>
+                  {unreadCount > 0 && (
+                    <span className="px-2 py-0.5 rounded-full bg-cyan-400 text-[#030C16] text-[10px] font-bold">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+              )}
 
               <button
                 onClick={() => {

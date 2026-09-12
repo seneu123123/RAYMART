@@ -1,0 +1,56 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start PHP Backend (port 8000)",
+      "type": "shell",
+      "command": "php",
+      "args": [
+        "-S",
+        "localhost:8000",
+        "api/index.php"
+      ],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "servers"
+      }
+    },
+    {
+      "label": "Start React Frontend (Vite)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "group": "servers"
+      }
+    },
+    {
+      "label": "Run Fullstack (PHP + React)",
+      "dependsOn": [
+        "Start PHP Backend (port 8000)",
+        "Start React Frontend (Vite)"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Import MySQL Database Schema",
+      "type": "shell",
+      "command": "mysql -u root -p alyn_shir_db < database/schema.sql",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ]
+}

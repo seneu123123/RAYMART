@@ -7,6 +7,7 @@ import { Header } from "./components/common/Header";
 import { Footer } from "./components/common/Footer";
 import { QRPassModal } from "./components/common/QRPassModal";
 import { ThemeAccessibilityModal } from "./components/common/ThemeAccessibilityModal";
+import { NotificationDrawer } from "./components/common/NotificationDrawer";
 
 // Client Portal Components
 import { HeroSection } from "./components/client/HeroSection";
@@ -28,6 +29,7 @@ import { ManifestModule } from "./components/admin/modules/ManifestModule";
 import { FleetModule } from "./components/admin/modules/FleetModule";
 import { HotelsModule } from "./components/admin/modules/HotelsModule";
 import { BillingModule } from "./components/admin/modules/BillingModule";
+import { PaymentAuditModule } from "./components/admin/modules/PaymentAuditModule";
 import { SettlementModule } from "./components/admin/modules/SettlementModule";
 import { ReviewsModule } from "./components/admin/modules/ReviewsModule";
 import { SyncHubModule } from "./components/admin/modules/SyncHubModule";
@@ -61,6 +63,8 @@ export default function App() {
   const [legalOpen, setLegalOpen] = useState(false);
   const [cookiesDrawerOpen, setCookiesDrawerOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [manifestSelectedBookingId, setManifestSelectedBookingId] = useState<string | undefined>();
 
   // Easter Egg Keyboard Hotkey: Ctrl+Shift+A or Cmd+Shift+A
   useEffect(() => {
@@ -193,6 +197,7 @@ export default function App() {
             onOpenTracker={() => setTrackerOpen(true)}
             onOpenConcierge={() => setConciergeOpen(true)}
             onOpenTheme={() => setThemeOpen(true)}
+            onOpenNotifications={() => setNotificationsOpen(true)}
             onTriggerAdminEasterEgg={handleTriggerAdminEasterEgg}
             currentUser={currentUser}
           />
@@ -245,7 +250,10 @@ export default function App() {
           {adminModule === "guides" && <GuidesModule />}
 
           {adminModule === "manifest" && (
-            <ManifestModule onViewQR={(b) => setQrPassBooking(b)} />
+            <ManifestModule
+              onViewQR={(b) => setQrPassBooking(b)}
+              preselectedBookingId={manifestSelectedBookingId}
+            />
           )}
 
           {adminModule === "fleet" && <FleetModule />}
@@ -253,6 +261,17 @@ export default function App() {
           {adminModule === "hotels" && <HotelsModule />}
 
           {adminModule === "billing" && <BillingModule />}
+
+          {adminModule === "payment_audit" && (
+            <PaymentAuditModule
+              currentUser={currentUser}
+              onViewBookingPass={(b) => setQrPassBooking(b)}
+              onProceedToManifest={(bookingId) => {
+                setManifestSelectedBookingId(bookingId);
+                setAdminModule("manifest");
+              }}
+            />
+          )}
 
           {adminModule === "settlement" && <SettlementModule />}
 
@@ -280,11 +299,14 @@ export default function App() {
         onSuccess={handleOtpSuccess}
       />
 
-      <BookingModal
-        packageItem={bookingModalPkg}
-        onClose={() => setBookingModalPkg(null)}
-        onBookingSuccess={handleBookingCreated}
-      />
+      {bookingModalPkg && (
+        <BookingModal
+          key={`${bookingModalPkg.id}-${Date.now()}`}
+          packageItem={bookingModalPkg}
+          onClose={() => setBookingModalPkg(null)}
+          onBookingSuccess={handleBookingCreated}
+        />
+      )}
 
       <QRPassModal
         booking={qrPassBooking}
@@ -326,6 +348,22 @@ export default function App() {
       <ThemeAccessibilityModal
         isOpen={themeOpen}
         onClose={() => setThemeOpen(false)}
+      />
+
+      <NotificationDrawer
+        isOpen={notificationsOpen}
+        onClose={() => setNotificationsOpen(false)}
+        onInspectBooking={(bookingId) => {
+          setNotificationsOpen(false);
+          const b =
+            StorageService.getBookingById(bookingId) ||
+            StorageService.getBookings().find((x) => x.id === bookingId);
+          if (b) {
+            setQrPassBooking(b);
+          } else {
+            setTrackerOpen(true);
+          }
+        }}
       />
 
       <CookieConsent

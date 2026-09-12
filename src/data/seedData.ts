@@ -9,6 +9,7 @@ import {
   AuditLogEntry,
   DestinationWeather,
   SystemSettings,
+  ClientNotification,
 } from "../types";
 
 export const INITIAL_STAFF_ACCOUNTS: UserAccount[] = [
@@ -20,6 +21,8 @@ export const INITIAL_STAFF_ACCOUNTS: UserAccount[] = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
     totpEnabled: true,
     active: true,
+    password: "Password123!",
+    accessCode: "ALYN-2026",
     permissions: {
       canEditPackages: true,
       canViewFinancials: true,
@@ -37,6 +40,8 @@ export const INITIAL_STAFF_ACCOUNTS: UserAccount[] = [
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
     totpEnabled: true,
     active: true,
+    password: "Password123!",
+    accessCode: "ALYN-2026",
     permissions: {
       canEditPackages: true,
       canViewFinancials: false,
@@ -49,11 +54,13 @@ export const INITIAL_STAFF_ACCOUNTS: UserAccount[] = [
   {
     id: "usr_finance",
     name: "Brian Jake B. Tallada",
-    email: "briantallada23@mail.com",
+    email: "briantallada23@gmail.com",
     role: "Finance Officer",
     avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80",
     totpEnabled: true,
     active: true,
+    password: "Password123!",
+    accessCode: "ALYN-2026",
     permissions: {
       canEditPackages: false,
       canViewFinancials: true,
@@ -69,8 +76,10 @@ export const INITIAL_STAFF_ACCOUNTS: UserAccount[] = [
     email: "babyjanelatonio@gmail.com",
     role: "Tour Guide",
     avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80",
-    totpEnabled: false,
+    totpEnabled: true,
     active: true,
+    password: "Password123!",
+    accessCode: "ALYN-2026",
     assignedTourIds: ["HT-2026-8819", "HT-2026-1042"],
     permissions: {
       canEditPackages: false,
@@ -972,3 +981,42 @@ export const INITIAL_SYSTEM_SETTINGS: SystemSettings = {
   safetyChecklistMandatory: true,
   autoLockMinutes: 15,
 };
+
+export const INITIAL_CLIENT_NOTIFICATIONS: ClientNotification[] = [
+  {
+    id: "notif-1",
+    bookingId: "HT-2026-8819",
+    packageTitle: "Coron Archipelago Ultimate Oceanic Expedition",
+    type: "boarding_pass_ready",
+    title: "Digital Embarkation Pass Ready",
+    message: "Passenger manifest cleared & approved by Operations Desk. Your digital QR boarding pass is ready for departure from Coron Port Gate 2.",
+    timestamp: "10 mins ago",
+    read: false,
+    actionLabel: "View Boarding Pass",
+    actionType: "view_pass",
+  },
+  {
+    id: "notif-2",
+    bookingId: "HT-2026-1042",
+    packageTitle: "El Nido Bacuit Bay Luxury Archipelago Escape",
+    type: "payment_verified",
+    title: "30% Downpayment Verified",
+    message: "InstaPay receipt to John Raymart Dordines verified by Finance Desk. Next step: Please verify guest onboarding manifest details.",
+    timestamp: "1 hour ago",
+    read: false,
+    actionLabel: "Review Manifest",
+    actionType: "fill_manifest",
+  },
+  {
+    id: "notif-3",
+    bookingId: "HT-2026-2309",
+    packageTitle: "Cebu & Bohol Heritage, Canyons & Marine Odyssey",
+    type: "payment_rephoto",
+    title: "Action Required: Re-Photo Payment Proof",
+    message: "The submitted screenshot was cropped and the InstaPay reference code is unreadable. Please upload a clear, uncropped receipt.",
+    timestamp: "3 hours ago",
+    read: false,
+    actionLabel: "Re-upload Receipt",
+    actionType: "reupload_payment",
+  },
+];

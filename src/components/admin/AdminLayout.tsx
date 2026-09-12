@@ -1,17 +1,19 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import {
   LayoutDashboard,
   Package,
   Users,
   ClipboardList,
   Compass,
-  Anchor,
+  Ship,
   Hotel,
   Receipt,
   Scale,
   MessageSquare,
   Server,
   ShieldCheck,
+  ShieldAlert,
   Settings,
   LogOut,
   ChevronRight,
@@ -21,6 +23,7 @@ import {
 } from "lucide-react";
 import { UserAccount, AdminModuleKey } from "../../types";
 import { StorageService } from "../../services/storage";
+import { AshLogo } from "../common/AshLogo";
 
 interface AdminLayoutProps {
   currentUser: UserAccount;
@@ -52,10 +55,11 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { key: "dashboard", label: "Operations Dashboard", icon: LayoutDashboard },
     { key: "packages", label: "Tour Packages & Catalog", icon: Package },
     { key: "guides", label: "DOT Guide Roster", icon: Users },
-    { key: "manifest", label: "Passenger Manifest (PCG)", icon: ClipboardList },
-    { key: "fleet", label: "Fleet & Vessels", icon: Anchor },
+    { key: "manifest", label: "Passenger Onboarding Manifest", icon: ClipboardList },
+    { key: "fleet", label: "Fleet & Vessels", icon: Ship },
     { key: "hotels", label: "Hotel Accommodations", icon: Hotel },
     { key: "billing", label: "Billing & Invoices (BIR 2307)", icon: Receipt },
+    { key: "payment_audit", label: "Payment Audit & Forensic Desk", icon: ShieldAlert },
     { key: "settlement", label: "Daily Reconciliation", icon: Scale },
     { key: "reviews", label: "CSAT & Guest Feedback", icon: MessageSquare },
     { key: "laravel_hub", label: "Laravel Hub & API Sync", icon: Server },
@@ -74,7 +78,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           >
             {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
-          <span className="font-serif font-bold text-lg text-white">ALYN SHIR Ops</span>
+          <div className="flex items-center gap-2">
+            <AshLogo className="w-5 h-5" />
+            <span className="font-serif font-bold text-lg text-white">ALYN SHIR Ops</span>
+          </div>
         </div>
         <button
           onClick={() => onSwitchPortal("client")}
@@ -95,7 +102,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
           <div className="p-5 border-b border-cyan-500/15 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
-                <Anchor className="w-5 h-5" />
+                <AshLogo className="w-6 h-6" showGlow />
               </div>
               <div>
                 <h2 className="font-serif font-bold text-base text-white tracking-wide">

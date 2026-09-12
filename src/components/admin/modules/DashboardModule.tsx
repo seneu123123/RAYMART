@@ -2,7 +2,7 @@ import React from "react";
 import {
   TrendingUp,
   Users,
-  Anchor,
+  Ship,
   ShieldCheck,
   Calendar,
   CreditCard,
@@ -53,7 +53,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
             onClick={() => onSelectModule("manifest")}
             className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-medium text-[#F4F1EA] transition-colors cursor-pointer"
           >
-            PCG Manifest Check
+            Onboarding Manifest Desk
           </button>
           <button
             onClick={() => onSelectModule("billing")}
@@ -93,7 +93,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
         <div className="bg-[#0B1014] border border-white/5 p-5 rounded-2xl space-y-2">
           <div className="flex items-center justify-between text-xs text-[#7C8B96]">
             <span>Vessels On Expedition</span>
-            <Anchor className="w-4 h-4 text-[#F26A4F]" />
+            <Ship className="w-4 h-4 text-cyan-400" />
           </div>
           <div className="font-serif text-2xl font-bold text-[#F4F1EA]">
             {activeCharters} / {fleet.length} Assets
@@ -123,7 +123,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                 Active Expedition Charters
               </h3>
               <p className="text-xs text-[#7C8B96]">
-                Real-time booking registry with PCG QR boarding access
+                Real-time booking registry with digital boarding pass access
               </p>
             </div>
             <button
@@ -176,7 +176,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
               <h3 className="font-serif text-lg text-[#F4F1EA] font-semibold">
                 Island Fleet Stations
               </h3>
-              <p className="text-xs text-[#7C8B96]">Live PAGASA / PCG telemetry</p>
+              <p className="text-xs text-[#7C8B96]">Live PAGASA marine swell telemetry</p>
             </div>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
           </div>
@@ -190,7 +190,7 @@ export const DashboardModule: React.FC<DashboardModuleProps> = ({
                 </div>
                 <div className="flex justify-between text-[11px] text-[#7C8B96]">
                   <span>{w.seaCondition} • Wave: {w.waveHeightM}m</span>
-                  <span className="text-emerald-400">PCG Cleared</span>
+                  <span className="text-emerald-400">Port Cleared</span>
                 </div>
               </div>
             ))}

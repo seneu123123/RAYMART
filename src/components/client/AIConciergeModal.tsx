@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { X, Send, Bot, User, Compass, CheckCircle2, ArrowRight, Zap, Anchor, Shield } from "lucide-react";
+import { X, Send, Bot, User, Compass, CheckCircle2, ArrowRight, Zap, Shield } from "lucide-react";
 import { StorageService, CONCIERGE_AUTO_REPLIES } from "../../services/storage";
 import { ConciergeAutoReply } from "../../types";
+import { AshLogo } from "../common/AshLogo";
 
 interface Message {
   id: string;
@@ -122,9 +123,7 @@ export const AIConciergeModal: React.FC<AIConciergeModalProps> = ({
         {/* Header */}
         <div className="bg-[#0B2238]/80 px-6 py-4 border-b border-cyan-500/20 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-sm shadow-cyan-500/20">
-              <Anchor className="w-5 h-5" />
-            </div>
+            <AshLogo size="sm" />
             <div>
               <h3 className="font-serif text-lg text-white font-bold flex items-center gap-2">
                 <span>ALYN SHIR Automated Concierge</span>

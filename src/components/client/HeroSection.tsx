@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Search, Anchor, Sparkles, MapPin, Compass, ArrowDown, Waves, ShieldCheck } from "lucide-react";
+import { motion } from "motion/react";
+import { Search, Sparkles, MapPin, ArrowDown, Waves, QrCode } from "lucide-react";
+import { AshLogo } from "../common/AshLogo";
 
 interface HeroSectionProps {
   onSearch: (destination: string) => void;
@@ -34,14 +36,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
-        {/* Subtle, Elegant Status Pill (Subdued as requested, full details moved to footer) */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-950/50 border border-cyan-500/25 backdrop-blur-md text-xs text-cyan-200">
-          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-          <span className="font-semibold text-white">ALYN SHIR Marine Logistics</span>
+        {/* Brand Status Pill */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/30 backdrop-blur-md text-xs text-cyan-200 shadow-md shadow-cyan-950/50">
+          <AshLogo className="w-4 h-4" />
+          <span className="font-semibold text-white">ALYN SHIR Charters</span>
           <span className="text-cyan-500/40">•</span>
-          <span className="text-emerald-400 flex items-center gap-1">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            PCG Inspected &amp; DOT Accredited
+          <span className="text-cyan-300 flex items-center gap-1 font-medium">
+            Direct Commercial Island Charters &amp; Verified Passes
           </span>
         </div>
 
@@ -53,6 +54,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               Marine Expeditions
             </span>
           </h1>
+
+          {/* Official Acronym Definition of ALYN SHIR */}
+          <div className="pt-2 pb-1">
+            <div className="inline-flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 px-5 py-2.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/25 backdrop-blur-md shadow-lg shadow-cyan-950/40">
+              <span className="text-xs sm:text-sm font-medium tracking-wide text-cyan-200">
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">A</span>lways{" "}
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">L</span>eading{" "}
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">Y</span>our
+              </span>
+              <span className="hidden sm:inline text-cyan-500/40">•</span>
+              <span className="text-xs sm:text-sm font-medium tracking-wide text-cyan-200">
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">N</span>ext{" "}
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">S</span>eamless{" "}
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">H</span>orizon,
+              </span>
+              <span className="hidden sm:inline text-cyan-500/40">•</span>
+              <span className="text-xs sm:text-sm font-medium tracking-wide text-cyan-200">
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">I</span>nspiring{" "}
+                <span className="text-cyan-400 font-bold font-serif text-sm sm:text-base">R</span>oads
+              </span>
+            </div>
+          </div>
+
           <p className="text-sm sm:text-base md:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed">
             Curating bespoke chartered bancas, private catamaran voyages, and pristine marine sanctuary odysseys across Palawan, Siargao, Bohol, and Batanes.
           </p>
@@ -84,7 +108,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </div>
 
             {/* Weather advisory check button */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="button"
               onClick={onOpenWeather}
               className="flex items-center justify-between px-3.5 py-2.5 bg-[#030C16] hover:bg-cyan-950/40 rounded-2xl border border-cyan-500/15 text-left transition-all cursor-pointer group"
@@ -101,16 +127,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-semibold">
                 Open
               </span>
-            </button>
+            </motion.button>
 
             {/* Explore expeditions button */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
               type="submit"
               className="flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-[#030C16] text-xs font-bold shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
             >
               <Search className="w-4 h-4" />
               <span>Explore Expeditions</span>
-            </button>
+            </motion.button>
           </form>
         </div>
 
@@ -126,10 +154,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
           <div className="p-4 bg-[#071726]/80 border border-cyan-500/15 rounded-2xl backdrop-blur-sm shadow-sm">
             <p className="text-[10px] text-emerald-400 uppercase tracking-wider font-semibold font-mono">
-              Coast Guard
+              Digital Boarding
             </p>
-            <p className="text-xs font-bold text-emerald-300 mt-1">100% PCG Seaworthy</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">Strict wave &amp; swell limits</p>
+            <p className="text-xs font-bold text-emerald-300 mt-1">Instant QR Embarkation Pass</p>
+            <p className="text-[11px] text-slate-400 mt-0.5">Offline pass for pier entry</p>
           </div>
 
           <div className="p-4 bg-[#071726]/80 border border-cyan-500/15 rounded-2xl backdrop-blur-sm shadow-sm">

@@ -15,6 +15,7 @@ export type AdminModuleKey =
   | "hotels"
   | "billing"
   | "settlement"
+  | "payment_audit"
   | "reviews"
   | "laravel_hub"
   | "rbac"
@@ -28,6 +29,8 @@ export interface UserAccount {
   avatar: string;
   totpEnabled: boolean;
   active: boolean;
+  password?: string;
+  accessCode?: string;
   phone?: string;
   dotLicenseNumber?: string;
   languagesSpoken?: string[];
@@ -93,10 +96,25 @@ export interface PassengerInfo {
   idVerified: boolean;
   checkedIn: boolean;
   checkInTimestamp?: string;
+  checkedOut?: boolean;
+  checkOutTimestamp?: string;
 }
 
 export type BookingStatus = "Confirmed" | "Pending Payment" | "Completed" | "Cancelled";
 export type PaymentStatus = "Unpaid" | "Downpayment Paid (30%)" | "Fully Paid" | "Refunded";
+
+export type ManifestAuditStatus =
+  | "Needs Manifest Submission"
+  | "Pending Manifest Review"
+  | "Needs Manifest Revision"
+  | "Manifest Cleared";
+
+export type EmbarkationStatus =
+  | "Awaiting Clearance"
+  | "Boarding Pass Ready"
+  | "Checked-In at Pier"
+  | "Embarked & Departed"
+  | "Checked-Out & Completed";
 
 export interface Booking {
   id: string; // e.g. "HT-2026-8819"
@@ -118,12 +136,43 @@ export interface Booking {
   amountPaid: number;
   status: BookingStatus;
   paymentStatus: PaymentStatus;
+  paymentAuditStatus?: PaymentAuditStatus;
+  paymentReference?: string;
+  paymentProofUrl?: string;
+  paymentMethod?: PaymentMethod;
+  manifestAuditStatus?: ManifestAuditStatus;
+  manifestNotes?: string;
+  embarkationStatus?: EmbarkationStatus;
+  departureDock?: string;
+  departureTime?: string;
+  offlineKitDownloaded?: boolean;
   createdAt: string;
   assignedGuideId?: string;
   assignedGuideName?: string;
   assignedVesselId?: string;
   assignedVanId?: string;
   hotelVoucherCode?: string;
+}
+
+export interface ClientNotification {
+  id: string;
+  bookingId: string;
+  packageTitle: string;
+  type:
+    | "payment_verified"
+    | "payment_rephoto"
+    | "manifest_needed"
+    | "manifest_approved"
+    | "boarding_pass_ready"
+    | "departure_imminent"
+    | "embarked";
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  actionLabel?: string;
+  actionType?: "inspect_booking" | "reupload_payment" | "fill_manifest" | "view_pass" | "offline_kit";
+  priority?: "normal" | "high" | "urgent";
 }
 
 export type VesselType = "Motorized Banca Catamaran" | "Twin-Engine Speedboat" | "Tourist Coaster Van";
@@ -168,6 +217,12 @@ export interface HotelReservation {
 }
 
 export type PaymentMethod = "GCash" | "Maya" | "Bank Transfer (BDO/BPI)" | "Cash";
+export type PaymentAuditStatus =
+  | "Verified"
+  | "Pending Verification"
+  | "Needs Re-Photo"
+  | "Flagged as Suspect"
+  | "Rejected";
 
 export interface PaymentTransaction {
   id: string;
@@ -178,9 +233,14 @@ export interface PaymentTransaction {
   method: PaymentMethod;
   referenceNumber: string;
   timestamp: string;
-  status: "Verified" | "Pending Verification" | "Flagged";
+  status: PaymentAuditStatus;
   verifiedBy?: string;
   bir2307Generated?: boolean;
+  proofImageUrl?: string;
+  auditNotes?: string;
+  auditReason?: string;
+  recipientAccountName?: string;
+  recipientAccountNumber?: string;
 }
 
 export interface CustomerReview {

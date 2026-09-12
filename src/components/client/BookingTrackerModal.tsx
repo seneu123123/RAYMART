@@ -1,5 +1,20 @@
 import React, { useState } from "react";
-import { X, Search, QrCode, Calendar, MapPin, Users, CheckCircle2, Clock, AlertCircle, ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
+import {
+  X,
+  Search,
+  QrCode,
+  Calendar,
+  MapPin,
+  Users,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  ArrowRight,
+  ShieldCheck,
+  FileCheck,
+  Ship,
+} from "lucide-react";
 import { Booking } from "../../types";
 import { StorageService } from "../../services/storage";
 
@@ -123,28 +138,168 @@ export const BookingTrackerModal: React.FC<BookingTrackerModalProps> = ({
                 </div>
               </div>
 
-              {/* Status Stepper */}
-              <div className="grid grid-cols-3 gap-2 text-center text-xs">
+              {/* Payment Audit Status Notification Banner */}
+              {foundBooking.paymentAuditStatus && (
+                <div
+                  className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 ${
+                    foundBooking.paymentAuditStatus === "Verified"
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                      : foundBooking.paymentAuditStatus === "Needs Re-Photo"
+                      ? "bg-blue-500/15 border-blue-500/30 text-blue-300"
+                      : foundBooking.paymentAuditStatus === "Flagged as Suspect"
+                      ? "bg-rose-500/15 border-rose-500/30 text-rose-300"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                  }`}
+                >
+                  {foundBooking.paymentAuditStatus === "Verified" && (
+                    <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+                  )}
+                  {foundBooking.paymentAuditStatus === "Needs Re-Photo" && (
+                    <AlertCircle className="w-5 h-5 shrink-0 text-blue-400" />
+                  )}
+                  {(foundBooking.paymentAuditStatus === "Flagged as Suspect" ||
+                    foundBooking.paymentAuditStatus === "Rejected") && (
+                    <AlertCircle className="w-5 h-5 shrink-0 text-rose-400" />
+                  )}
+                  {foundBooking.paymentAuditStatus === "Pending Verification" && (
+                    <Clock className="w-5 h-5 shrink-0 text-amber-400" />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-semibold">
+                      Payment Audit Status: {foundBooking.paymentAuditStatus}
+                    </p>
+                    <p className="text-[11px] text-[#D1CCC0] mt-0.5">
+                      {foundBooking.paymentAuditStatus === "Verified" &&
+                        "Your payment receipt to John Raymart Dordines (09466455124) has been audited and approved."}
+                      {foundBooking.paymentAuditStatus === "Needs Re-Photo" &&
+                        "Audit Note: Please re-upload a clearer or uncropped screenshot showing the complete transaction reference number."}
+                      {foundBooking.paymentAuditStatus === "Flagged as Suspect" &&
+                        "Audit Alert: Discrepancy detected in reference code or receipt format. Finance officer will review."}
+                      {foundBooking.paymentAuditStatus === "Pending Verification" &&
+                        "Your transaction receipt is currently queued for audit clearance by our finance desk."}
+                    </p>
+                    {foundBooking.paymentReference && (
+                      <p className="text-[10px] text-[#7C8B96] font-mono mt-1">
+                        Submitted Ref: {foundBooking.paymentReference} • Channel: {foundBooking.paymentMethod || "InstaPay"}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* 4-Step Booking & Verification Lifecycle Stepper */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+                {/* Step 1 */}
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                   <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                  <p className="font-medium">1. Slot Reserved</p>
-                  <p className="text-[10px] text-[#7C8B96]">30% Downpayment</p>
+                  <p className="font-semibold">1. Reserved</p>
+                  <p className="text-[10px] text-slate-400">30% Downpayment</p>
                 </div>
-                <div className={`p-2.5 rounded-xl border ${
-                  foundBooking.paymentStatus === "Fully Paid"
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                    : "bg-amber-500/10 border-amber-500/20 text-amber-300"
-                }`}>
-                  <Clock className="w-4 h-4 mx-auto mb-1" />
-                  <p className="font-medium">2. Settlement</p>
-                  <p className="text-[10px] text-[#7C8B96]">{foundBooking.paymentStatus}</p>
+
+                {/* Step 2 */}
+                <div
+                  className={`p-2.5 rounded-xl border ${
+                    foundBooking.paymentAuditStatus === "Verified"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                  }`}
+                >
+                  {foundBooking.paymentAuditStatus === "Verified" ? (
+                    <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-emerald-400" />
+                  ) : (
+                    <Clock className="w-4 h-4 mx-auto mb-1" />
+                  )}
+                  <p className="font-semibold">2. Payment Audited</p>
+                  <p className="text-[10px] text-slate-400">
+                    {foundBooking.paymentAuditStatus || "Pending"}
+                  </p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-300">
-                  <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
-                  <p className="font-medium">3. Coast Guard Clearance</p>
-                  <p className="text-[10px] text-[#7C8B96]">Manifest OK</p>
+
+                {/* Step 3 */}
+                <div
+                  className={`p-2.5 rounded-xl border ${
+                    foundBooking.manifestAuditStatus === "Manifest Cleared"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : foundBooking.manifestAuditStatus === "Needs Manifest Revision"
+                      ? "bg-rose-500/10 border-rose-500/20 text-rose-300"
+                      : "bg-cyan-500/10 border-cyan-500/20 text-cyan-300"
+                  }`}
+                >
+                  {foundBooking.manifestAuditStatus === "Manifest Cleared" ? (
+                    <CheckCircle2 className="w-4 h-4 mx-auto mb-1 text-emerald-400" />
+                  ) : (
+                    <FileCheck className="w-4 h-4 mx-auto mb-1" />
+                  )}
+                  <p className="font-semibold">3. Onboarding Manifest</p>
+                  <p className="text-[10px] text-slate-400">
+                    {foundBooking.manifestAuditStatus || "Pending Audit"}
+                  </p>
+                </div>
+
+                {/* Step 4 */}
+                <div
+                  className={`p-2.5 rounded-xl border ${
+                    foundBooking.embarkationStatus === "Embarked & Departed"
+                      ? "bg-purple-500/15 border-purple-500/30 text-purple-300"
+                      : foundBooking.embarkationStatus === "Checked-In at Pier"
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      : "bg-slate-800/60 border-white/5 text-slate-400"
+                  }`}
+                >
+                  <Ship className="w-4 h-4 mx-auto mb-1" />
+                  <p className="font-semibold">4. Pier &amp; Departure</p>
+                  <p className="text-[10px] text-slate-400">
+                    {foundBooking.embarkationStatus || "Awaiting Departure"}
+                  </p>
                 </div>
               </div>
+
+              {/* Manifest Audit Notification Banner */}
+              {foundBooking.manifestAuditStatus && (
+                <div
+                  className={`p-3.5 rounded-xl border text-xs flex items-start gap-3 ${
+                    foundBooking.manifestAuditStatus === "Manifest Cleared"
+                      ? "bg-cyan-500/10 border-cyan-500/30 text-cyan-300"
+                      : foundBooking.manifestAuditStatus === "Needs Manifest Revision"
+                      ? "bg-rose-500/15 border-rose-500/30 text-rose-300"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-300"
+                  }`}
+                >
+                  {foundBooking.manifestAuditStatus === "Manifest Cleared" ? (
+                    <CheckCircle2 className="w-5 h-5 shrink-0 text-cyan-400" />
+                  ) : (
+                    <AlertCircle className="w-5 h-5 shrink-0 text-amber-400" />
+                  )}
+                  <div className="flex-1">
+                    <p className="font-semibold">
+                      Passenger Manifest Verification: {foundBooking.manifestAuditStatus}
+                    </p>
+                    <p className="text-[11px] text-slate-300 mt-0.5">
+                      {foundBooking.manifestAuditStatus === "Manifest Cleared" &&
+                        "All passenger legal IDs, emergency contacts, and medical alerts have been certified. Digital Embarkation Pass is ready."}
+                      {foundBooking.manifestAuditStatus === "Needs Manifest Revision" &&
+                        `Revision Required: ${foundBooking.manifestNotes || "Please update guest emergency contacts or legal identification."}`}
+                      {foundBooking.manifestAuditStatus === "Pending Manifest Review" &&
+                        "Your passenger roster is currently undergoing verification by our operations desk."}
+                      {foundBooking.manifestAuditStatus === "Needs Manifest Submission" &&
+                        "Please complete all passenger full names and emergency contacts before departure."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Embarked / Departed completion message */}
+              {foundBooking.embarkationStatus === "Embarked & Departed" && (
+                <div className="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-200 text-xs flex items-center gap-3">
+                  <Ship className="w-5 h-5 shrink-0 text-purple-400" />
+                  <div>
+                    <p className="font-semibold">Voyage Underway</p>
+                    <p className="text-[11px] text-slate-300 mt-0.5">
+                      Your vessel has cleared the pier and departed. Your digital onboarding cycle is complete — no further website action is needed. Have a splendid voyage!
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Details grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -168,14 +323,16 @@ export const BookingTrackerModal: React.FC<BookingTrackerModalProps> = ({
 
               {/* Action Button: Boarding Pass */}
               <div className="pt-2 flex justify-end">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   onClick={() => onViewQR(foundBooking)}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#F26A4F] hover:bg-[#FF765B] text-white text-xs font-semibold shadow-lg transition-colors cursor-pointer"
                 >
                   <QrCode className="w-4 h-4" />
-                  <span>View Official QR Boarding Pass & Voucher</span>
+                  <span>View Official QR Boarding Pass &amp; Voucher</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </motion.button>
               </div>
             </div>
           ) : searched ? (
